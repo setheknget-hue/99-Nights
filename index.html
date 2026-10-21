@@ -3146,6 +3146,7 @@ const VOICE=(()=>{
     return sdp.replace(m[0],m[0]+'\r\na=fmtp:'+pt+' '+add.join(';'));
   }
   function tuneSender(o){
+    if(!o.tr)return;
     try{const p=o.tr.sender.getParameters();if(!p.encodings||!p.encodings.length)p.encodings=[{}];p.encodings[0].maxBitrate=32000;p.encodings[0].priority='high';p.encodings[0].networkPriority='high';o.tr.sender.setParameters(p).catch(()=>{})}catch(e){}
   }
   function close(pid){
@@ -3156,21 +3157,23 @@ const VOICE=(()=>{
   function create(pid,init){
     close(pid);
     const pc=new RTCPeerConnection({iceServers:ICE(),bundlePolicy:'max-bundle',rtcpMuxPolicy:'require'});
-    const tr=pc.addTransceiver('audio',{direction:'sendrecv'});
-    const o={pc,pid,tr,init,rd:false,aud:null,t0:Date.now(),an:null,buf:null};pcs[pid]=o;
-    if(track)tr.sender.replaceTrack(track).catch(()=>{});
-    pc.onicecandidate=e=>{if(e.candidate)sig(pid,{c:e.candidate.toJSON?e.candidate.toJSON():e.candidate})};
+    // ម្ចាស់ផ្តួចផ្តើមបង្កើតបណ្តាញសំឡេង · ម្ខាងទៀតប្រើបណ្តាញដែលមកពី offer (មិនបង្កើតស្ទួន)
+    const tr=init?pc.addTransceiver('audio',{direction:'sendrecv'}):null;
+    const o={pc,pid,tr,init,rd:false,aud:null,t0:Date.now(),an:null,buf:null,sid:init?Math.random().toString(36).slice(2,10):''};pcs[pid]=o;
+    if(track&&tr)tr.sender.replaceTrack(track).catch(()=>{});
+    pc.onicecandidate=e=>{if(e.candidate)sig(pid,{c:e.candidate.toJSON?e.candidate.toJSON():e.candidate,i:o.sid})};
     pc.ontrack=e=>attach(o,(e.streams&&e.streams[0])||new MediaStream([e.track]));
     pc.onconnectionstatechange=()=>{
       const st=pc.connectionState;
-      if(st==='connected')tuneSender(o);
-      else if(st==='failed'||st==='closed'){if(pcs[pid]===o)close(pid)}
+      const nm=()=>{const r=G&&G.R&&G.R[pid];return r&&r.n?String(r.n).slice(0,16):'មិត្ត'};
+      if(st==='connected'){tuneSender(o);if(!o.ok){o.ok=1;toast('🎧 ភ្ជាប់សំឡេងជាមួយ '+nm()+' រួចហើយ','good')}}
+      else if(st==='failed'||st==='closed'){if(pcs[pid]===o){if(st==='failed')toast('⚠ ភ្ជាប់សំឡេងជាមួយ '+nm()+' មិនបាន (បណ្តាញរារាំង — ត្រូវការ TURN មើល README_VOICE.md)','bad');close(pid)}}
       else if(st==='disconnected')setTimeout(()=>{if(pcs[pid]===o&&pc.connectionState!=='connected')close(pid)},6000);
     };
     return o;
   }
   async function offer(o){
-    try{const d=await o.pc.createOffer();d.sdp=tune(d.sdp);await o.pc.setLocalDescription(d);sig(o.pid,{d:{type:'offer',sdp:d.sdp}})}catch(e){close(o.pid)}
+    try{const d=await o.pc.createOffer();d.sdp=tune(d.sdp);await o.pc.setLocalDescription(d);sig(o.pid,{d:{type:'offer',sdp:d.sdp},i:o.sid})}catch(e){close(o.pid)}
   }
   function attach(o,st){
     if(!box){box=document.createElement('div');box.style.cssText='position:fixed;left:-9999px;top:0;width:1px;height:1px;overflow:hidden';document.body.appendChild(box)}
@@ -3193,28 +3196,32 @@ const VOICE=(()=>{
         const d=s.d;if(typeof d.sdp!=='string'||d.sdp.length>14000)return;
         if(d.type==='offer'){
           if(me()<from)return; // ម្នាក់ដែលលេខ ID តូចជាអ្នកផ្តួចផ្តើម
-          const o=create(from,false);
-          await o.pc.setRemoteDescription({type:'offer',sdp:d.sdp});o.rd=true;flush(o);
-          const a=await o.pc.createAnswer();a.sdp=tune(a.sdp);await o.pc.setLocalDescription(a);sig(from,{d:{type:'answer',sdp:a.sdp}});
+          const o=create(from,false);o.sid=String(s.i||'').slice(0,16);
+          await o.pc.setRemoteDescription({type:'offer',sdp:d.sdp});o.rd=true;
+          const t=o.pc.getTransceivers().find(x=>x.receiver&&x.receiver.track&&x.receiver.track.kind==='audio')||o.pc.getTransceivers()[0];
+          if(t){t.direction='sendrecv';o.tr=t;if(track)t.sender.replaceTrack(track).catch(()=>{})}
+          flush(o);
+          const a=await o.pc.createAnswer();a.sdp=tune(a.sdp);await o.pc.setLocalDescription(a);sig(from,{d:{type:'answer',sdp:a.sdp},i:o.sid});
         }else if(d.type==='answer'){
-          const o=pcs[from];if(!o||!o.init||o.pc.signalingState!=='have-local-offer')return;
+          const o=pcs[from];if(!o||!o.init||o.pc.signalingState!=='have-local-offer'||s.i!==o.sid)return;
           await o.pc.setRemoteDescription({type:'answer',sdp:d.sdp});o.rd=true;flush(o);
         }
       }else if(s.c&&typeof s.c==='object'&&String(s.c.candidate||'').length<700){
         const o=pcs[from];
-        if(!o||!o.rd){const q=(pend[from]=pend[from]||[]);q.push(s.c);if(q.length>40)q.shift();return}
+        if(!o||!o.rd){const q=(pend[from]=pend[from]||[]);q.push({c:s.c,i:s.i});if(q.length>40)q.shift();return}
+        if(s.i!==o.sid)return;
         o.pc.addIceCandidate(s.c).catch(()=>{});
       }
     }catch(e){if(pcs[from])close(from)}
   }
-  function flush(o){const q=pend[o.pid]||[];delete pend[o.pid];for(const c of q)o.pc.addIceCandidate(c).catch(()=>{})}
+  function flush(o){const q=pend[o.pid]||[];delete pend[o.pid];for(const x of q)if(x.i===o.sid)o.pc.addIceCandidate(x.c).catch(()=>{})}
   function scan(){
     const g=G;if(!g||!g.net){stop();return}
     const ids=Object.keys(g.R),mid=me();
     for(const pid of ids){
       if(pid===mid)continue;
       let o=pcs[pid];
-      if(o&&o.init&&o.pc.signalingState==='have-local-offer'&&Date.now()-o.t0>7000){close(pid);o=null} // មិត្តមិនទាន់ទទួល → ព្យាយាមម្តងទៀត
+      if(o&&o.init&&o.pc.signalingState==='have-local-offer'&&Date.now()-o.t0>20000){close(pid);o=null} // មិត្តមិនទាន់ទទួល → ព្យាយាមម្តងទៀត
       if(!o){const n=create(pid,mid<pid);if(n.init)offer(n)}
     }
     for(const pid in pcs)if(ids.indexOf(pid)<0)close(pid);
@@ -3236,7 +3243,7 @@ const VOICE=(()=>{
           if(!G||!G.net){st.getTracks().forEach(t=>t.stop());micBusy=false;return}
           track=st.getAudioTracks()[0];try{track.contentHint='speech'}catch(e){}
           try{if(!actx)actx=new(window.AudioContext||window.webkitAudioContext)();selfAn=actx.createAnalyser();selfAn.fftSize=256;actx.createMediaStreamSource(st).connect(selfAn);selfBuf=new Uint8Array(selfAn.fftSize)}catch(e){}
-          for(const k in pcs)pcs[k].tr.sender.replaceTrack(track).catch(()=>{});
+          for(const k in pcs)if(pcs[k].tr)pcs[k].tr.sender.replaceTrack(track).catch(()=>{});
         }catch(e){micBusy=false;toast(e&&e.name==='NotAllowedError'?'សូមអនុញ្ញាតមីក្រូហ្វូនក្នុងការកំណត់កម្មវិធីរុករក':'បើកមីក្រូហ្វូនមិនបាន','bad');return}
         micBusy=false;
       }
