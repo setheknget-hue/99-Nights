@@ -302,6 +302,22 @@ body.touch #t-btns{display:flex}
 #t-pausebtn{position:absolute;top:max(12px,env(safe-area-inset-top,0px));right:max(12px,env(safe-area-inset-right,0px))}
 #tpause{position:absolute;inset:0;background:rgba(5,10,7,.78);display:flex;align-items:center;justify-content:center;pointer-events:auto}
 #tpause .card{display:flex;flex-direction:column;gap:12px;width:min(320px,90%);text-align:center}
+/* ===== [គណិតវិទ្យា] ===== */
+#temple.math #t-top,#temple.math #t-hint,#temple.math #t-btns{display:none!important}
+#m-ui{position:absolute;inset:0;pointer-events:none;font-weight:800}
+#m-top{position:absolute;top:max(12px,env(safe-area-inset-top,0px));left:50%;transform:translateX(-50%);width:min(380px,calc(100vw - 130px));display:flex;flex-direction:column;gap:5px;padding:9px 14px}
+#m-top .trow{display:flex;justify-content:space-between;align-items:center;font-size:14px}
+#m-lives{letter-spacing:2px}
+#m-bar.low i{background:var(--blood)}
+#m-card{position:absolute;left:50%;transform:translateX(-50%);bottom:max(12px,env(safe-area-inset-bottom,0px));width:min(360px,94vw);display:flex;flex-direction:column;gap:8px;padding:12px;text-align:center;pointer-events:auto}
+#m-expr{font-family:var(--f-display);font-size:clamp(26px,8vw,38px);line-height:1.3;min-height:1.3em}
+#m-expr.word{font-family:var(--f-body);font-size:clamp(15px,4.2vw,18px);font-weight:800;line-height:1.55;text-align:left;min-height:6.2em}
+#m-ans{font-family:var(--f-display);font-size:34px;line-height:1.4;min-height:1.4em;border-radius:10px;background:rgba(255,255,255,.08);border:2px solid var(--ember)}
+#m-ans.ok{border-color:var(--leaf);color:var(--leaf)}#m-ans.no{border-color:var(--blood);color:var(--blood)}
+#m-fb{min-height:1.4em;font-weight:800;font-size:14px}
+#m-pad{display:grid;grid-template-columns:repeat(3,1fr);gap:7px}
+#m-pad button{height:46px;font-size:22px;font-weight:800;border-radius:11px;background:rgba(255,255,255,.1);color:var(--ink);border:1px solid var(--line);touch-action:manipulation}
+#m-pad button.go{background:var(--ember);color:var(--ember-ink);border-color:transparent}
 </style>
 
 <div id="app">
@@ -399,7 +415,7 @@ body.touch #t-btns{display:flex}
     <div class="page">
       <h2>ជ្រើសរើសវគ្គ</h2>
       <div class="chapters" id="chapters"></div>
-      <p class="note" style="text-align:left">🚪 លេងម្នាក់ឯង: ទ្វា <b>[Temple Run]</b> · ដាក់ 🍖 សាច់អាំង ១០ + 🪨 ថ្ម ២០ + 🪵 ឈើ ២០ ក្នុងហិប រួចចុច «បើកទ្វាភ្ជាប់» នៅតុអាប់អាវុធ ដើម្បីបើកទ្វា black hole · រត់គេចក្រពើ ១:៥០ នាទី ឈ្នះ = រំលង ៤ ថ្ងៃ</p>
+      <p class="note" style="text-align:left">🚪 លេងម្នាក់ឯង: ទ្វា <b>[Temple Run]</b> · ដាក់ 🍖 សាច់អាំង ១០ + 🪨 ថ្ម ២០ + 🪵 ឈើ ២០ ក្នុងហិប រួចចុច «បើកទ្វាភ្ជាប់» នៅតុអាប់អាវុធ ដើម្បីបើកទ្វា black hole · រត់គេចក្រពើ ១:៥០ នាទី ឈ្នះ = រំលង ៤ ថ្ងៃ · ទ្វាបើកម្តងជាវគ្គ <b>Temple Run</b> ម្តងជាវគ្គ <b>🔢 គណិតវិទ្យា</b> (ឆ្លើយសំណួរ ២០ ឃ្លា ថ្លៃ និងរង្វាន់ដូចគ្នា)</p>
       <div><button class="btn ghost" id="b-chback">← ត្រឡប់ទៅបន្ទប់</button></div>
     </div>
   </section>
@@ -481,7 +497,17 @@ body.touch #t-btns{display:flex}
     <div id="t-flash"></div>
     <div id="t-hint">← → ឬ A D = ឆ្វេង/ស្តាំ · Space = ហក់ · អូសលើអេក្រង់ក៏បាន</div>
     <div id="t-btns" class="ui"><button class="btn ghost" id="t-l" aria-label="ឆ្វេង">◀</button><button class="btn" id="t-j" aria-label="ហក់">⤒</button><button class="btn ghost" id="t-r" aria-label="ស្តាំ">▶</button></div>
-    <div id="tpause" hidden><div class="card"><h2 style="font-size:20px">ផ្អាក</h2><button class="btn" id="t-resume">បន្តរត់</button><button class="btn ghost" id="t-quit">បោះបង់ (បាត់សម្ភារៈដែលបង់)</button></div></div>
+    <div id="m-ui" hidden>
+      <div id="m-top" class="card">
+        <div class="trow"><span>🔢 គណិតវិទ្យា</span><span id="m-q"></span></div>
+        <div class="trow"><span id="m-lives"></span><span id="m-time"></span></div>
+        <div class="tbar" id="m-bar"><i></i></div>
+      </div>
+      <div id="m-card" class="card ui">
+        <div id="m-expr"></div><div id="m-ans"></div><div id="m-fb"></div><div id="m-pad"></div>
+      </div>
+    </div>
+    <div id="tpause" hidden><div class="card"><h2 style="font-size:20px">ផ្អាក</h2><button class="btn" id="t-resume">បន្ត</button><button class="btn ghost" id="t-quit">បោះបង់ (បាត់សម្ភារៈដែលបង់)</button></div></div>
   </div>
   <div id="pause" hidden>
     <div class="card"><h2 style="font-size:20px">ផ្អាក</h2>
@@ -913,7 +939,7 @@ function openPortal(){
     if(!ok){toast('សម្ភារៈក្នុងហិបមិនគ្រប់','bad');return}
     if(!g.net||g.net.host){if(!hostOpenPortal())return}
     else netSend({t:'popen'});
-    toast('🕳️ ទ្វា black hole បើកហើយ! ដើរចូលដើម្បីទៅ [Temple Run]','good');
+    toast('🕳️ ទ្វា black hole បើកហើយ! ដើរចូលដើម្បីទៅ '+(!g.net||g.net.host?kindName(portalKind(g.portalId)):'វគ្គថ្មី'),'good');
   });
 }
 /* ---- ជួយជីវិតមិត្តរួមក្រុម (នៅតុអាប់អាវុធ · លេងជាក្រុមតែប៉ុណ្ណោះ) ---- */
@@ -1624,9 +1650,9 @@ function renderChest(){
       for(const k of dead)h+='<div class="rc"><span style="font-size:20px">☠</span><div><b>'+esc(g.R[k].n)+'</b><small>ត្រូវការជំនួយ</small></div><button class="btn sm" data-rv="'+esc(k)+'"'+(can?'':' disabled')+'>ជួយ</button></div>';
     }
     {
-      const ok=portalOk();
-      h+='<h3>🕳️ ទ្វាភ្ជាប់ [Temple Run]</h3><div class="stock">'+['cooked','stone','wood'].map(k=>{const n=c.inv[k]||0,need=TEMPLE_COST[k];return '<span class="chip" style="'+(n>=need?'':'opacity:.65')+'">'+ITEMS[k][0]+' '+Math.min(n,999)+'/'+need+'</span>'}).join('')+'</div>';
-      h+='<p class="muted" style="margin:0;font-size:12px">ប្រើសម្ភារៈក្នុងហិប · ទ្វាបើក ១ នាទី ចូលបានម្នាក់តែប៉ុណ្ណោះ (គ្មានអ្នកចូល = រលាយ) · រត់គេចក្រពើ '+fmtT(TEMPLE_TIME)+' នាទី ឈ្នះ = រំលង '+TEMPLE_SKIP+' ថ្ងៃ</p>';
+      const ok=portalOk(),nk=(!g.net||g.net.host)?portalKind((g.pidc||0)+1):null;
+      h+='<h3>🕳️ ទ្វាភ្ជាប់ · Temple Run / គណិតវិទ្យា</h3><div class="stock">'+['cooked','stone','wood'].map(k=>{const n=c.inv[k]||0,need=TEMPLE_COST[k];return '<span class="chip" style="'+(n>=need?'':'opacity:.65')+'">'+ITEMS[k][0]+' '+Math.min(n,999)+'/'+need+'</span>'}).join('')+'</div>';
+      h+='<p class="muted" style="margin:0;font-size:12px">ប្រើសម្ភារៈក្នុងហិប · ទ្វាបើក ១ នាទី ចូលបានម្នាក់តែប៉ុណ្ណោះ (គ្មានអ្នកចូល = រលាយ) · '+(nk?'ទ្វាបន្ទាប់៖ <b>'+kindName(nk)+'</b> · '+(nk==='math'?'ឆ្លើយសំណួរ '+MATH_N+' ឃ្លា':'រត់គេចក្រពើ '+fmtT(TEMPLE_TIME)+' នាទី'):'Temple Run៖ រត់គេចក្រពើ '+fmtT(TEMPLE_TIME)+' នាទី · គណិតវិទ្យា៖ ឆ្លើយសំណួរ '+MATH_N+' ឃ្លា (ទ្វាបើកម្តង Temple Run ម្តង គណិតវិទ្យា ម្តង)')+' · ឈ្នះ = រំលង '+TEMPLE_SKIP+' ថ្ងៃ</p>';
       h+='<button class="btn" data-portal="1"'+(ok&&!g.portal&&nearObj(g.table,6)?'':' disabled')+'>'+(g.portal?'ទ្វាបើករួចហើយ':ok?'🕳️ បើកទ្វាភ្ជាប់':'សម្ភារៈក្នុងហិបមិនគ្រប់')+'</button>';
     }
   }
@@ -2522,7 +2548,7 @@ function cliData(room,d){
     case 'res':{const arr=g[RES_K[d.k]],o=arr&&arr[d.i|0];if(o)resDown(o);break}
     case 'cst':{if(d.inv&&typeof d.inv==='object')for(const k in ITEMS)g.chest.inv[k]=clamp(+d.inv[k]|0,0,999);g.bagT=0;break}
     case 'cr':{const cb=g.cqs&&g.cqs[d.q];if(cb){delete g.cqs[d.q];cb(d.a)}break}
-    case 'port':if(num(d.x)&&num(d.z)&&!g.portal){spawnPortal(clamp(d.x,-70,70),clamp(d.z,-70,70),d.id);toast('🕳️ ទ្វា black hole បានបើក! ដើរចូលទៅ [Temple Run]','good')}break;
+    case 'port':if(num(d.x)&&num(d.z)&&!g.portal){spawnPortal(clamp(d.x,-70,70),clamp(d.z,-70,70),d.id);toast('🕳️ ទ្វា black hole បានបើក! ដើរចូលទៅ '+kindName(portalKind(d.id)),'good')}break;
     case 'vsig':VOICE.sigIn(normId(d.from),d.s);break;
     case 'rev':if(!g.p.alive&&!g.netEnded)reviveMe(d.x,d.z);break;
     case 'rvno':toast(String(d.r||'ជួយជីវិតមិនបាន').slice(0,60),'bad');break;
@@ -2891,7 +2917,10 @@ function buildTempleScene(){
 }
 function enterTemple(prepaid,pid){
   const g=G;if(!g||(g.net&&!prepaid))return;if(!prepaid){if(!gateOk())return;payGate()}
-  g.away=!!g.net;g.p.mesh.visible=false;g.gateOpen=false;SFX.p('warp');SFX.temple(true);mAud.volume=.2;$('#gate').hidden=true;
+  g.away=!!g.net;g.p.mesh.visible=false;g.gateOpen=false;SFX.p('warp');
+  if(portalKind(pid===undefined?(g.portalId|0):pid)==='math'){enterMath(pid);return}
+  $('#temple').classList.remove('math');$('#m-ui').hidden=true;
+  SFX.temple(true);mAud.volume=.2;$('#gate').hidden=true;
   const u=U(),t=buildTempleScene();
   const pm=makeChar(u.gender||'m',u.outfit||DEF_OUT.m);pm.rotation.y=Math.PI;t.scene.add(pm);
   pm.add(mesh(EGG(),'#f4ecd6',.2,.27,.2,0,1.12,.34));
@@ -2909,9 +2938,10 @@ function tHud(){
   const gi=$('#t-gap i');gi.style.width=Math.max(0,Math.min(100,(t.gap-2)/10*100))+'%';
 }
 function tPause(v){
-  const t=TR;if(!t||t.state==='win'||t.state==='lose')return;t.paused=v;$('#tpause').hidden=!v;
+  const t=TR;if(!t||t.state==='win'||t.state==='lose')return;t.paused=v;$('#tpause').hidden=!v;if(t.kind==='math')$('#m-ui').style.visibility=v?'hidden':'';
 }
 function templeKey(code){
+  if(TR&&TR.kind==='math'){mathKey(code);return}
   if(code==='ArrowLeft'||code==='KeyA')tInput('L');
   else if(code==='ArrowRight'||code==='KeyD')tInput('R');
   else if(code==='Space'||code==='ArrowUp'||code==='KeyW')tInput('J');
@@ -2930,6 +2960,7 @@ function tHit(){
 }
 function templeTick(dt){
   const t=TR;if(!t||t.paused)return;
+  if(t.kind==='math'){mathTick(dt);return}
   t.bt+=dt;
   // ចលនាខ្លួនប្រាណ
   const grounded=t.y<=.001&&t.vy<=0;
@@ -2992,6 +3023,7 @@ function hostSkip(id){ // host: រំលងថ្ងៃតែម្តងក្
 function endTemple(win){
   const t=TR,g=G;TR=null;
   $('#temple').hidden=true;$('#t-count').innerHTML='';$('#tpause').hidden=true;
+  $('#temple').classList.remove('math');$('#m-ui').hidden=true;$('#m-ui').style.visibility='';
   mode='game';$('#hud').hidden=false;
   Object.keys(keys).forEach(k=>keys[k]=false);
   g.paused=false;g.away=false;g.p.pLock=true;SFX.temple(false);mAud.volume=.5;if(!g.p.inTent)g.p.mesh.visible=true;
@@ -3005,9 +3037,152 @@ function endTemple(win){
     el.hidden=false;g.tmsgOpen=true;g.paused=true;$('#tr-ok').onclick=closeTMsg;
     toast('អ្នកឆ្លងផុត '+TEMPLE_SKIP+' ថ្ងៃ!','good');
   }else{
-    toast('🐊 ក្រពើចាប់បាន! អ្នកត្រឡប់មកវិញដោយគ្មានអ្វីទទួលបានឡើយ','bad');
+    toast(t.kind==='math'?'😢 មិនបានឆ្លងផុតវគ្គគណិតវិទ្យា! អ្នកត្រឡប់មកវិញដោយគ្មានអ្វីទទួលបានឡើយ':'🐊 ក្រពើចាប់បាន! អ្នកត្រឡប់មកវិញដោយគ្មានអ្វីទទួលបានឡើយ','bad');
   }
 }
+/* ============ វគ្គ [គណិតវិទ្យា] — ឆ្លើយសំណួរ ២០ ឃ្លា ពីស្រួលទៅលំបាក ============
+   ទ្វា black hole បើកម្តង Temple Run ម្តង គណិតវិទ្យាម្តង (តាមលេខ id នៃទ្វា: សេស = Temple Run · គូ = គណិតវិទ្យា)
+   ថ្លៃចូល និងរង្វាន់ (រំលង TEMPLE_SKIP ថ្ងៃ) ដូច Temple Run បេះបិទ
+   ឈ្នះ = ឆ្លើយគ្រប់ MATH_N សំណួរ ហើយនៅមានជីវិត · ខុស ឬអស់ម៉ោង = បាត់ ១ ជីវិត */
+const MATH_N=20,MATH_LIVES=4;
+const MATH_TIME=[12,12,15,15,20,20,25,25,30, 20,20,30,30,40,40,50,50,50, 45,60]; // វិនាទី ក្នុងមួយសំណួរ
+const portalKind=id=>{id|=0;return id>0&&id%2===0?'math':'temple'};
+const kindName=k=>k==='math'?'🔢 គណិតវិទ្យា':'🐊 Temple Run';
+const mRnd=(a,b)=>a+Math.floor(Math.random()*(b-a+1));
+function mEval(s){ // គណនាតាមលំដាប់ប្រមាណវិធី (× ÷ មុន + -) · ចែកមិនសល់ ឬចម្លើយអវិជ្ជមាន = NaN
+  const k=s.match(/\d+|[+\-×÷]/g);let i=0;
+  const term=()=>{let v=+k[i++];while(k[i]==='×'||k[i]==='÷'){const o=k[i++],n=+k[i++];if(o==='×')v*=n;else{if(!n||v%n)return NaN;v/=n}}return v};
+  let v=term();
+  while(i<k.length){const o=k[i++],n=term();v=o==='+'?v+n:v-n;if(!(v>=0))return NaN}
+  return v}
+const MATH_SPEC=[ // [ទម្រង់, ជួរលេខ] — សំណួរទី ១ ដល់ ១៨
+  ['A+B',{A:[1,9],B:[1,9]}],
+  ['A-B',{A:[10,19],B:[1,9]}],
+  ['A+B',{A:[10,40],B:[10,40]}],
+  ['A-B',{A:[30,99],B:[11,29]}],
+  ['A+B-C',{A:[2,9],B:[2,9],C:[1,6]}],
+  ['A-B+C',{A:[10,30],B:[3,9],C:[3,15]}],
+  ['A+B+C-D',{A:[5,20],B:[5,20],C:[5,20],D:[5,20]}],
+  ['A-B-C+D',{A:[40,80],B:[5,20],C:[5,20],D:[5,25]}],
+  ['A+B-C+D-E',{A:[8,40],B:[8,40],C:[5,25],D:[8,40],E:[5,25]}],
+  ['A×B',{A:[2,5],B:[2,9]}],
+  ['A÷B',{A:[6,45],B:[2,9]}],
+  ['A×B+C',{A:[2,9],B:[2,9],C:[1,20]}],
+  ['A×B-C',{A:[3,9],B:[3,9],C:[1,20]}],
+  ['A+B×C-D',{A:[5,30],B:[2,9],C:[2,9],D:[2,20]}],
+  ['A÷B+C×D',{A:[6,60],B:[2,9],C:[2,9],D:[2,9]}],
+  ['A+B×C-D÷E',{A:[3,20],B:[2,9],C:[2,9],D:[4,40],E:[2,8]}],
+  ['A×B÷C+D',{A:[2,12],B:[2,12],C:[2,9],D:[1,30]}],
+  ['A-B×C+D÷E',{A:[30,99],B:[2,9],C:[2,6],D:[4,60],E:[2,9]}]
+];
+function mWord(i){ // សំណួរទី ១៩ (ងាយ) និង ២០ (មធ្យម) — ចំណោទខ្លីៗ
+  const pick=a=>a[Math.floor(Math.random()*a.length)];
+  if(i===18)return pick([
+    ()=>{const a=mRnd(12,30),b=mRnd(5,20);return[`ស្រីមានស្វាយ ${a} ផ្លែ។ ម្តាយឲ្យបន្ថែម ${b} ផ្លែ។ ឥឡូវស្រីមានស្វាយសរុបប៉ុន្មានផ្លែ?`,a+b]},
+    ()=>{const a=mRnd(20,50),b=mRnd(6,19);return[`ក្នុងថង់មានស្ករ ${a} ដុំ។ ប្អូនញ៉ាំអស់ ${b} ដុំ។ នៅសល់ស្ករប៉ុន្មានដុំ?`,a-b]},
+    ()=>{const a=mRnd(3,8),b=mRnd(2,9);return[`ថ្នាក់មួយមានតុ ${a} ជួរ ជួរមួយមាន ${b} តុ។ ថ្នាក់នោះមានតុសរុបប៉ុន្មាន?`,a*b]}
+  ])();
+  return pick([
+    ()=>{const a=mRnd(30,60),b=mRnd(5,20),c=mRnd(5,25);return[`ម្ចាស់ហាងមានស៊ុត ${a} គ្រាប់។ គាត់លក់អស់ ${b} គ្រាប់ ហើយទិញបន្ថែម ${c} គ្រាប់។ ឥឡូវគាត់មានស៊ុតប៉ុន្មានគ្រាប់?`,a-b+c]},
+    ()=>{const p=pick([500,1000,1500]),n=mRnd(2,4),m=(Math.floor(p*n/1000)+1+mRnd(0,1))*1000;return[`ប៊ិចមួយដើមថ្លៃ ${p} រៀល។ សុខទិញ ${n} ដើម ហើយឲ្យលុយ ${m} រៀល។ គេត្រូវអាប់លុយសុខវិញប៉ុន្មានរៀល?`,m-p*n]},
+    ()=>{const n=mRnd(3,6),k=mRnd(3,6),tot=n*k+mRnd(4,15);return[`ក្មេង ${n} នាក់ ម្នាក់ៗទទួលបានស្វាយ ${k} ផ្លែ។ ពីដំបូងមានស្វាយ ${tot} ផ្លែ។ នៅសល់ស្វាយប៉ុន្មានផ្លែ?`,tot-n*k]}
+  ])();
+}
+function mGen(i){
+  const time=MATH_TIME[i];
+  if(i>=18){const w=mWord(i);return{txt:w[0],ans:w[1],word:true,time}}
+  const [tp,rg]=MATH_SPEC[i];
+  for(let n=0;n<600;n++){
+    const s=tp.replace(/[A-E]/g,c=>mRnd(rg[c][0],rg[c][1])),v=mEval(s);
+    if(Number.isInteger(v)&&v>=2&&v<=200)return{txt:s.replace(/([+\-×÷])/g,' $1 ')+' = ?',ans:v,word:false,time};
+  }
+  return{txt:'6 + 4 = ?',ans:10,word:false,time};
+}
+function buildMathScene(){
+  const sc=new THREE.Scene(),col=new THREE.Color('#9fd3ff');
+  sc.background=col;sc.fog=new THREE.Fog(col.clone(),20,70);
+  sc.add(new THREE.HemisphereLight(0xffffff,0x4a7a3a,1.0));
+  const dl=new THREE.DirectionalLight(0xffffff,.7);dl.position.set(-4,8,6);sc.add(dl);
+  sc.add(box(80,.4,80,'#5fae58',0,-.25,0),box(5.4,.25,5.4,'#d9c79a',0,.0,0));
+  sc.add(box(7.4,3.6,.2,'#2f4a3a',0,2.3,-3.2),box(7.8,4.0,.15,'#8b5a2b',0,2.3,-3.32));
+  const t={scene:sc,sy:[]},syms=['+','−','×','÷','=','?','2','3','5','7','9','8'],cols=['#ff7a59','#ffd23f','#3bceac','#5aa9ff','#c77dff','#ff9bd2'];
+  syms.forEach((c,i)=>{
+    const cv=document.createElement('canvas');cv.width=cv.height=128;const x=cv.getContext('2d');
+    x.fillStyle=cols[i%cols.length];x.beginPath();x.arc(64,64,58,0,TAU);x.fill();
+    x.fillStyle='#fff';x.font='bold 84px sans-serif';x.textAlign='center';x.textBaseline='middle';x.fillText(c,64,70);
+    const sp=new THREE.Sprite(new THREE.SpriteMaterial({map:new THREE.CanvasTexture(cv),transparent:true,fog:false}));
+    const a=i/syms.length*TAU,r=3.6+(i%3)*.9,y0=1.2+((i*7)%5)*.7;
+    sp.scale.setScalar(.9+(i%3)*.15);sp.position.set(Math.sin(a)*r,y0,Math.cos(a)*r-1.5);sc.add(sp);t.sy.push({sp,y0,ph:i*1.3});
+  });
+  return t;
+}
+function enterMath(pid){
+  const g=G,u=U(),t=buildMathScene();
+  const pm=makeChar(u.gender||'m',u.outfit||DEF_OUT.m);pm.position.set(0,0,.6);t.scene.add(pm);
+  const qs=[];for(let i=0;i<MATH_N;i++)qs.push(mGen(i));
+  Object.assign(t,{kind:'math',player:pm,qs,q:0,lives:MATH_LIVES,ok:0,input:'',state:'cd',cd:3,left:0,limit:1,fbT:0,endT:0,paused:false,bt:0,hop:0,shake:0,pid:pid===undefined?(g.portalId|0):pid});
+  TR=t;mode='temple';mAud.volume=.3;$('#gate').hidden=true;
+  $('#hud').hidden=true;$('#bag').hidden=true;$('#chest').hidden=true;$('#prompt').hidden=true;
+  $('#temple').classList.add('math');$('#temple').hidden=false;$('#tpause').hidden=true;$('#t-flash').style.opacity=0;
+  $('#m-ui').hidden=true;$('#m-ui').style.visibility='';
+  tcam.position.set(0,2.3,5.2);tcam.lookAt(0,-.3,0);
+  Object.keys(keys).forEach(k=>keys[k]=false);
+}
+function mathHud(){
+  const t=TR,L=Math.max(0,t.left);
+  $('#m-q').textContent='សំណួរ '+Math.min(MATH_N,t.q+1)+' / '+MATH_N;
+  $('#m-lives').textContent='❤'.repeat(Math.max(0,t.lives))+'🖤'.repeat(MATH_LIVES-Math.max(0,t.lives));
+  $('#m-time').textContent='⏱ '+Math.ceil(L)+' វិ';
+  const b=$('#m-bar');b.firstElementChild.style.width=(t.limit?L/t.limit*100:0)+'%';b.classList.toggle('low',L<=5);
+}
+function mathShowQ(){
+  const t=TR,q=t.qs[t.q];t.input='';t.left=t.limit=q.time;t.state='ask';
+  const e=$('#m-expr');e.textContent=q.txt;e.classList.toggle('word',q.word);
+  const a=$('#m-ans');a.className='';a.textContent='';$('#m-fb').textContent='';
+  mathHud();
+}
+function mathPress(k){
+  const t=TR;if(!t||t.kind!=='math'||t.paused||t.state!=='ask')return;
+  if(k==='ok'){if(t.input!=='')mathResolve(+t.input===t.qs[t.q].ans,false);return}
+  if(k==='b')t.input=t.input.slice(0,-1);else if(t.input.length<5)t.input+=k;
+  $('#m-ans').textContent=t.input;
+}
+function mathKey(code){
+  if(code==='Escape'||code==='KeyP'){tPause(!TR.paused);return}
+  const m=/^(?:Digit|Numpad)(\d)$/.exec(code);if(m){mathPress(m[1]);return}
+  if(code==='Backspace'||code==='Delete')mathPress('b');
+  else if(code==='Enter'||code==='NumpadEnter')mathPress('ok');
+}
+function mathResolve(ok,timeout){
+  const t=TR,q=t.qs[t.q],a=$('#m-ans'),f=$('#m-fb');t.state='fb';
+  if(ok){t.ok++;t.hop=1;SFX.p('mok');a.className='ok';f.textContent='✅ ត្រូវហើយ!';t.fbT=.9}
+  else{t.lives--;t.shake=1;SFX.p('mno');a.className='no';if(timeout)a.textContent='⏰';f.textContent=(timeout?'⏰ អស់ម៉ោង! ':'❌ មិនត្រូវ! ')+'ចម្លើយគឺ '+q.ans;t.fbT=1.8}
+  mathHud();
+}
+function mathTick(dt){
+  const t=TR;t.bt+=dt;
+  for(const s of t.sy){s.sp.position.y=s.y0+Math.sin(t.bt*1.3+s.ph)*.3;s.sp.material.rotation=Math.sin(t.bt*.7+s.ph)*.25}
+  t.hop=Math.max(0,t.hop-dt*2);t.shake=Math.max(0,t.shake-dt*2.5);
+  t.player.position.y=t.hop>0?Math.sin((1-t.hop)*Math.PI)*.8:0;t.player.rotation.z=Math.sin(t.bt*40)*.1*t.shake;
+  animChar(t.player,dt,0,0);
+  if(t.state==='cd'){
+    t.cd-=dt;const n=Math.ceil(t.cd);
+    $('#t-count').innerHTML=(n>0?n:'')+'<small>🔢 ឆ្លើយសំណួរគណិតវិទ្យា '+MATH_N+' ឃ្លា<br>មានជីវិត '+MATH_LIVES+' · ខុស ឬអស់ម៉ោង = បាត់ ១ ជីវិត</small>';
+    if(t.cd<=0){$('#t-count').innerHTML='';$('#m-ui').hidden=false;mathShowQ()}
+  }else if(t.state==='ask'){
+    t.left-=dt;mathHud();if(t.left<=0)mathResolve(false,true);
+  }else if(t.state==='fb'){
+    t.fbT-=dt;
+    if(t.fbT<=0){
+      if(t.lives<=0){t.state='lose';t.endT=1.8;$('#m-ui').hidden=true;$('#t-count').innerHTML='💔<small>អស់ជីវិតហើយ... សាកល្បងម្តងទៀត!</small>'}
+      else if(++t.q>=MATH_N){t.state='win';t.endT=1.8;SFX.p('warp');$('#m-ui').hidden=true;$('#t-count').innerHTML='🎓<small>ឆ្លងផុត '+MATH_N+' សំណួរ! ឆ្លើយត្រូវ '+t.ok+' / '+MATH_N+'</small>'}
+      else mathShowQ();
+    }
+  }else{t.endT-=dt;if(t.endT<=0)endTemple(t.state==='win')}
+  tcam.position.set(0,2.3,5.2);tcam.lookAt(0,-.3,0);
+}
+{const pad=$('#m-pad');['7','8','9','4','5','6','1','2','3','b','0','ok'].forEach(k=>{const b=document.createElement('button');b.type='button';b.textContent=k==='b'?'⌫':k==='ok'?'✓':k;if(k==='ok')b.className='go';b.addEventListener('pointerdown',e=>{e.preventDefault();mathPress(k)});pad.appendChild(b)})}
+
 $('#t-l').addEventListener('pointerdown',e=>{e.preventDefault();tInput('L')});
 $('#t-r').addEventListener('pointerdown',e=>{e.preventDefault();tInput('R')});
 $('#t-j').addEventListener('pointerdown',e=>{e.preventDefault();tInput('J')});
@@ -3381,6 +3556,8 @@ const SFX=(()=>{
     ghostMoan(t,v){const pts=[[1,260],[2.3,190]];voice(t,2.6,{f:330,pts,fm:'oo',v:.14*v,a:.5,vr:5.5,vd:14,breath:900,bamt:.3});voice(t,2.6,{f:497,pts:pts.map(q=>[q[0],q[1]*1.5]),fm:'oo',type:'triangle',v:.06*v,a:.6,vr:4.8,vd:12})},
     firepop(t,v){noise(t,.025,{type:'highpass',f:R(1800,4000),v:R(.1,.3)*v,a:.002})},
     portal(t,v){osc(t,1.3,{f:90,f2:420,v:.25*v,a:.4});noise(t,1.3,{f:300,f2:1500,q:1.2,v:.15*v,a:.4})},
+    mok(t,v){osc(t,.12,{f:660,v:.22*v,a:.005});osc(t+.1,.22,{f:990,v:.22*v,a:.005})},
+    mno(t,v){osc(t,.32,{type:'sawtooth',f:210,f2:110,lp:700,v:.18*v,a:.005})},
     warp(t,v){osc(t,.9,{f:720,f2:55,v:.3*v,a:.02});noise(t,.9,{f:2200,f2:200,q:1,v:.2*v,a:.02})},
     crocsnap(t,v){osc(t,.3,{f:95,f2:40,v:.6*v,a:.003});noise(t,.05,{f:2200,q:2,v:.5*v,a:.002});noise(t+.09,.05,{f:1900,q:2,v:.5*v,a:.002});osc(t+.1,.5,{type:'sawtooth',f:90,f2:60,lp:300,vr:25,vd:8,v:.25*v,a:.03})},
     lub(t,v){osc(t,.13,{f:75,f2:42,v:.55*v,a:.004});osc(t+.19,.11,{f:68,f2:40,v:.38*v,a:.004})},
