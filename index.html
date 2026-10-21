@@ -3130,7 +3130,12 @@ setInterval(()=>{
 const VOICE=(()=>{
   let pcs={},pend={},track=null,micOn=false,spkOn=true,box=null,actx=null,lvl={},tScan=0,tMeter=0,started=false,micBusy=false,selfAn=null,selfBuf=null;
   const me=()=>U().pid;
-  const ICE=()=>window.FN_ICE||[{urls:'stun:stun.l.google.com:19302'},{urls:['turn:eu-0.turn.peerjs.com:3478','turn:us-0.turn.peerjs.com:3478'],username:'peerjs',credential:'peerjsp'}];
+  // ICE: STUN ជាសាធារណៈ + TURN ផ្ទាល់ខ្លួនរបស់អ្នក (window.FN_ICE ក្នុង config.js) ឬ TURN សាធារណៈជាបម្រុង
+  const STUN={urls:['stun:stun.l.google.com:19302','stun:stun1.l.google.com:19302','stun:global.stun.twilio.com:3478']};
+  const ICE=()=>Array.isArray(window.FN_ICE)&&window.FN_ICE.length?[STUN].concat(window.FN_ICE):[STUN,
+    {urls:['turn:eu-0.turn.peerjs.com:3478','turn:us-0.turn.peerjs.com:3478'],username:'peerjs',credential:'peerjsp'},
+    {urls:['turn:openrelay.metered.ca:80','turn:openrelay.metered.ca:443','turn:openrelay.metered.ca:443?transport=tcp','turns:openrelay.metered.ca:443?transport=tcp'],username:'openrelayproject',credential:'openrelayproject'}];
+  const warned={};
   const ICON={
     mic:'<svg viewBox="0 0 24 24" width="20" height="20"><rect x="9" y="3" width="6" height="11" rx="3" fill="currentColor"/><path d="M5.5 11a6.5 6.5 0 0 0 13 0M12 17.5V21M8.5 21h7" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>',
     micoff:'<svg viewBox="0 0 24 24" width="20" height="20"><rect x="9" y="3" width="6" height="11" rx="3" fill="currentColor" opacity=".55"/><path d="M5.5 11a6.5 6.5 0 0 0 13 0M12 17.5V21M8.5 21h7" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" opacity=".55"/><path d="M4 4l16 16" stroke="#ff6b6b" stroke-width="2.4" stroke-linecap="round"/></svg>',
@@ -3156,18 +3161,18 @@ const VOICE=(()=>{
   }
   function create(pid,init){
     close(pid);
-    const pc=new RTCPeerConnection({iceServers:ICE(),bundlePolicy:'max-bundle',rtcpMuxPolicy:'require'});
+    const pc=new RTCPeerConnection({iceServers:ICE(),bundlePolicy:'max-bundle',rtcpMuxPolicy:'require',iceCandidatePoolSize:2});
     // ម្ចាស់ផ្តួចផ្តើមបង្កើតបណ្តាញសំឡេង · ម្ខាងទៀតប្រើបណ្តាញដែលមកពី offer (មិនបង្កើតស្ទួន)
     const tr=init?pc.addTransceiver('audio',{direction:'sendrecv'}):null;
-    const o={pc,pid,tr,init,rd:false,aud:null,t0:Date.now(),an:null,buf:null,sid:init?Math.random().toString(36).slice(2,10):''};pcs[pid]=o;
+    const o={pc,pid,tr,init,rd:false,aud:null,t0:Date.now(),an:null,buf:null,cand:{host:0,srflx:0,relay:0},sid:init?Math.random().toString(36).slice(2,10):''};pcs[pid]=o;
     if(track&&tr)tr.sender.replaceTrack(track).catch(()=>{});
-    pc.onicecandidate=e=>{if(e.candidate)sig(pid,{c:e.candidate.toJSON?e.candidate.toJSON():e.candidate,i:o.sid})};
+    pc.onicecandidate=e=>{if(e.candidate){const m=/ typ (host|srflx|relay)/.exec(e.candidate.candidate||'');if(m)o.cand[m[1]]++}if(e.candidate)sig(pid,{c:e.candidate.toJSON?e.candidate.toJSON():e.candidate,i:o.sid})};
     pc.ontrack=e=>attach(o,(e.streams&&e.streams[0])||new MediaStream([e.track]));
     pc.onconnectionstatechange=()=>{
       const st=pc.connectionState;
       const nm=()=>{const r=G&&G.R&&G.R[pid];return r&&r.n?String(r.n).slice(0,16):'មិត្ត'};
       if(st==='connected'){tuneSender(o);if(!o.ok){o.ok=1;toast('🎧 ភ្ជាប់សំឡេងជាមួយ '+nm()+' រួចហើយ','good')}}
-      else if(st==='failed'||st==='closed'){if(pcs[pid]===o){if(st==='failed')toast('⚠ ភ្ជាប់សំឡេងជាមួយ '+nm()+' មិនបាន (បណ្តាញរារាំង — ត្រូវការ TURN មើល README_VOICE.md)','bad');close(pid)}}
+      else if(st==='failed'||st==='closed'){if(pcs[pid]===o){if(st==='failed'&&!warned[pid]){warned[pid]=1;toast('⚠ ភ្ជាប់សំឡេងជាមួយ '+nm()+' មិនបាន · '+(o.cand.relay?'TURN ឆ្លើយតប តែនៅតែតមិនបាន':'គ្មាន TURN ដំណើរការ')+' (host:'+o.cand.host+' stun:'+o.cand.srflx+' turn:'+o.cand.relay+') — មើល README_VOICE.md','bad')}close(pid)}}
       else if(st==='disconnected')setTimeout(()=>{if(pcs[pid]===o&&pc.connectionState!=='connected')close(pid)},6000);
     };
     return o;
